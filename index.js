@@ -1,13 +1,18 @@
-const { default: makeWASocket, useSingleFileAuthState } = require("@whiskeysockets/baileys");
-const { state, saveState } = useSingleFileAuthState('./session.json');
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
+const P = require("pino");
 
-const sock = makeWASocket({
-    auth: state
-});
+async function startBot() {
+  // إنشاء أو استدعاء Session
+  const { state, saveCreds } = await useMultiFileAuthState("session");
 
-sock.ev.on('creds.update', saveState);
+  // إنشاء اتصال البوت
+  const sock = makeWASocket({
+    auth: state,
+    logger: P({ level: "silent" }) // مفيش printQRInTerminal
+  });
 
-console.log("Bot is running...");
+  // حفظ بيانات الدخول
+  sock.ev.on("creds.update", saveCreds);
 
   // مراقبة حالة الاتصال
   sock.ev.on("connection.update", (update) => {
