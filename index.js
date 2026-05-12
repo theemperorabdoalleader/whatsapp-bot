@@ -1,27 +1,29 @@
-const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys")
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys")
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState("auth")
+  const { state, saveCreds } = await useMultiFileAuthState("session")
 
-    const sock = makeWASocket({
-        auth: state,
-        printQRInTerminal: true
-    })
+  const sock = makeWASocket({
+    auth: state,
+    printQRInTerminal: false
+  })
 
-    sock.ev.on("creds.update", saveCreds)
+  sock.ev.on("creds.update", saveCreds)
 
-    sock.ev.on("messages.upsert", async (m) => {
-        const msg = m.messages[0]
-        if (!msg.message) return
+  sock.ev.on("connection.update", (update) => {
+    const { connection, lastDisconnect } = update
 
-        const text = msg.message.conversation || msg.message.extendedTextMessage?.text
+    if (connection === "open") {
+      console.log("✅ البوت شغال")
+    }
 
-        if (text === "السلام عليكم") {
-            await sock.sendMessage(msg.key.remoteJid, {
-                text: "وعليكم السلام ورحمة الله وبركاته 🤍"
-            })
-        }
-    })
+    if (connection === "close") {
+      const shouldReconnect =
+        lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
+
+      if (shouldReconnect) startBot()
+    }
+  })
 }
 
 startBot()
