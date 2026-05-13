@@ -1,4 +1,4 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
+const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys");
 const P = require("pino");
 const qrcode = require("qrcode-terminal");
 
@@ -14,9 +14,9 @@ async function startBot() {
   sock.ev.on("creds.update", saveCreds);
 
   sock.ev.on("connection.update", (update) => {
-    const { connection, lastDisconnect, qr } = update;
+    const { connection, qr } = update;
 
-    // عرض QR كصورة في اللوج
+    // عرض QR
     if (qr) {
       console.log("📌 امسح الكود ده:");
       qrcode.generate(qr, { small: true });
@@ -29,14 +29,7 @@ async function startBot() {
 
     // لو الاتصال اتقفل
     if (connection === "close") {
-      const shouldReconnect =
-        lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-
-      if (shouldReconnect) {
-        console.log("🔄 حصل قطع... سيب Railway يعيد التشغيل");
-      } else {
-        console.log("❌ تم تسجيل الخروج");
-      }
+      console.log("❌ الاتصال اتقفل... مستني إعادة تشغيل");
     }
   });
 }
