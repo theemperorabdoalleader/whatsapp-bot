@@ -1,6 +1,5 @@
 const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys");
 const P = require("pino");
-const qrcode = require("qrcode-terminal");
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState("session");
@@ -10,27 +9,30 @@ async function startBot() {
     logger: P({ level: "silent" })
   });
 
+  // حفظ السيشن
   sock.ev.on("creds.update", saveCreds);
 
-  sock.ev.on("connection.update", (update) => {
-    const { connection, qr } = update;
+  // 🔥 كود الربط برقمك
+  if (!sock.authState.creds.registered) {
+    const phoneNumber = "201149182286"; // رقمك اتحط هنا
 
-    if (qr) {
-      console.log("📌 امسح الكود ده:");
-      qrcode.generate(qr, { small: true });
-    }
+    const code = await sock.requestPairingCode(phoneNumber);
+    console.log("📌 كود الربط:", code);
+  }
+
+  sock.ev.on("connection.update", (update) => {
+    const { connection } = update;
 
     if (connection === "open") {
       console.log("✅ البوت اشتغل واتصل بنجاح");
     }
 
     if (connection === "close") {
-      console.log("❌ الاتصال اتقفل... بنحاول تاني");
+      console.log("❌ الاتصال اتقفل... بيحاول تاني");
 
-      // 🔥 أهم سطر (إعادة المحاولة)
       setTimeout(() => {
         startBot();
-      }, 3000);
+      }, 5000);
     }
   });
 }
