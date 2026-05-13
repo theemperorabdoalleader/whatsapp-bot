@@ -1,40 +1,41 @@
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
 const P = require("pino");
+const qrcode = require("qrcode-terminal");
 
 async function startBot() {
-  // إنشاء أو استدعاء Session
   const { state, saveCreds } = await useMultiFileAuthState("session");
 
-  // إنشاء اتصال البوت
   const sock = makeWASocket({
     auth: state,
-    logger: P({ level: "silent" }) // مفيش printQRInTerminal
+    logger: P({ level: "silent" })
   });
 
-  // حفظ بيانات الدخول
+  // حفظ السيشن
   sock.ev.on("creds.update", saveCreds);
 
-  // مراقبة حالة الاتصال
   sock.ev.on("connection.update", (update) => {
     const { connection, lastDisconnect, qr } = update;
 
-    // لو ظهر QR
+    // عرض QR كصورة في اللوج
     if (qr) {
-      console.log("📌 امسح الـ QR باستخدام موبايلك التاني:");
-      console.log(qr);
+      console.log("📌 امسح الكود ده:");
+      qrcode.generate(qr, { small: true });
     }
 
-    // لو البوت اتصل بنجاح
+    // تم الاتصال
     if (connection === "open") {
       console.log("✅ البوت اشتغل واتصل بنجاح");
     }
 
-    // لو البوت اتقطع الاتصال
+    // لو الاتصال اتقفل
     if (connection === "close") {
       const shouldReconnect =
         lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+
       if (shouldReconnect) {
-        console.log("🔄 إعادة تشغيل البوت...")
+        console.log("🔄 حصل قطع... سيب Railway يعيد التشغيل");
+      } else {
+        console.log("❌ تم تسجيل الخروج");
       }
     }
   });
