@@ -34,8 +34,7 @@ async function startBot() {
       const shouldReconnect =
         lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
       if (shouldReconnect) {
-        console.log("🔄 إعادة تشغيل البوت...");
-        startBot();
+        console.log("🔄 إعادة تشغيل البوت...")
       }
     }
   });
