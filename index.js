@@ -1,30 +1,17 @@
-const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys");
-const qrcode = require("qrcode-terminal");
+sock.ev.on("connection.update", async ({ connection, qr }) => {
 
-async function startBot() {
-  const { state, saveCreds } = await useMultiFileAuthState("session");
+  if (qr) {
+    console.log("📌 امسح الكود بسرعة:");
+    const qrcode = require("qrcode-terminal");
+    qrcode.generate(qr, { small: true });
+  }
 
-  const sock = makeWASocket({
-    auth: state
-  });
+  if (connection === "open") {
+    console.log("✅ اتصل خلاص وثبت");
+  }
 
-  sock.ev.on("creds.update", saveCreds);
-
-  sock.ev.on("connection.update", ({ connection, qr }) => {
-
-    if (qr) {
-      console.log("📌 امسح الكود بسرعة:");
-      qrcode.generate(qr, { small: true }); // 🔥 ده المهم
-    }
-
-    if (connection === "open") {
-      console.log("✅ البوت اشتغل");
-    }
-
-    if (connection === "close") {
-      console.log("❌ فصل... مستني");
-    }
-  });
-}
-
-startBot();
+  if (connection === "close") {
+    console.log("❌ الاتصال اتقفل بس مش هنعيد تشغيل");
+    // ❌ مهم: مفيش restart هنا
+  }
+});
