@@ -24,7 +24,7 @@ async function startBot() {
 
     if (connection === "close") {
       console.log("❌ فصل... بيعيد");
-      setTimeout(startBot, 5000);
+      setTimeout(startBot, 15000);
     }
   });
 }
