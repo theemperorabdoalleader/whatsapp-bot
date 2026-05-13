@@ -5,8 +5,7 @@ async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState("session");
 
   const sock = makeWASocket({
-    auth: state,
-    printQRInTerminal: true
+    auth: state
   });
 
   sock.ev.on("creds.update", saveCreds);
@@ -14,17 +13,16 @@ async function startBot() {
   sock.ev.on("connection.update", ({ connection, qr }) => {
 
     if (qr) {
-      console.log("📌 امسح الكود:");
-      qrcode.generate(qr, { small: true });
+      console.log("📌 امسح الكود بسرعة:");
+      qrcode.generate(qr, { small: true }); // 🔥 ده المهم
     }
 
     if (connection === "open") {
-      console.log("✅ البوت اشتغل 100%");
+      console.log("✅ البوت اشتغل");
     }
 
     if (connection === "close") {
-      console.log("❌ فصل... بيعيد");
-      setTimeout(startBot, 15000);
+      console.log("❌ فصل... مستني");
     }
   });
 }
