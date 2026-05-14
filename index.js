@@ -3,11 +3,11 @@ const qrcode = require("qrcode-terminal");
 const express = require("express");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
-// سيرفر بسيط يخلي Railway مبسوط 😄
+// مهم عشان Railway مايقفلش
 app.get("/", (req, res) => {
-  res.send("Bot is running");
+  res.send("Bot is running ✅");
 });
 
 app.listen(PORT, () => {
@@ -26,16 +26,16 @@ async function startBot() {
   sock.ev.on("connection.update", ({ connection, qr }) => {
 
     if (qr) {
-      console.log("📌 امسح الكود:");
-      qrcode.generate(qr, { small: true });
+      console.log("📌 امسح الكود بسرعة:");
+      qrcode.generate(qr, { small: true }); // 🔥 ده اللي هيظهر QR
     }
 
     if (connection === "open") {
-      console.log("✅ البوت اشتغل");
+      console.log("✅ البوت اشتغل واتربط");
     }
 
     if (connection === "close") {
-      console.log("❌ الاتصال اتقفل (مستني)");
+      console.log("❌ الاتصال اتقفل (مستني بدون إعادة تشغيل)");
     }
   });
 }
