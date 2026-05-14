@@ -1,11 +1,9 @@
 const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys");
-const qrcode = require("qrcode-terminal");
 const express = require("express");
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// مهم عشان Railway مايقفلش
 app.get("/", (req, res) => {
   res.send("Bot is running ✅");
 });
@@ -23,19 +21,15 @@ async function startBot() {
 
   sock.ev.on("creds.update", saveCreds);
 
-  sock.ev.on("connection.update", ({ connection, qr }) => {
+  // 🔥 هنا السحر
+  const phoneNumber = "201149182286"; // رقمك بدون + ولا 0
+  const code = await sock.requestPairingCode(phoneNumber);
 
-    if (qr) {
-      console.log("📌 امسح الكود بسرعة:");
-      qrcode.generate(qr, { small: true }); // 🔥 ده اللي هيظهر QR
-    }
+  console.log("🔑 كود الربط:", code);
 
+  sock.ev.on("connection.update", ({ connection }) => {
     if (connection === "open") {
       console.log("✅ البوت اشتغل واتربط");
-    }
-
-    if (connection === "close") {
-      console.log("❌ الاتصال اتقفل (مستني بدون إعادة تشغيل)");
     }
   });
 }
